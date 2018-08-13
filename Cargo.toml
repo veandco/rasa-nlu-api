@@ -1,0 +1,11 @@
+[package]
+name = "rasa-nlu-api"
+version = "0.0.1"
+authors = ["Jacky Boen <jacky@veand.co>"]
+
+[dependencies]
+actix-web = "0.7"
+futures = "0.1"
+serde = "1.0"
+serde_derive = "1.0"
+serde_json = "1.0"
