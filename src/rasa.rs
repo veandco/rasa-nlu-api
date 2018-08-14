@@ -17,9 +17,9 @@ impl RasaNLUData {
 
 #[derive(Serialize, Deserialize)]
 pub struct CommonExample {
-    text: String,
-    intent: String,
-    entities: Vec<Entity>,
+    pub text: String,
+    pub intent: String,
+    pub entities: Vec<Entity>,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -32,12 +32,12 @@ pub struct Entity {
 
 #[derive(Serialize, Deserialize)]
 pub struct RegexFeature {
-    name: String,
-    pattern: String,
+    pub name: String,
+    pub pattern: String,
 }
 
 #[derive(Serialize, Deserialize)]
 pub struct EntitySynonym {
-    value: String,
-    synonyms: Vec<String>,
+    pub value: String,
+    pub synonyms: Vec<String>,
 }

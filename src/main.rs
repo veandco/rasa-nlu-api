@@ -18,7 +18,7 @@ extern crate serde_json;
 
 // internal
 mod rasa;
-use rasa::RasaNLUData;
+use rasa::*;
 
 // This is where's we are going to manipulate Rasa NLU data
 struct AppState {
@@ -60,6 +60,35 @@ fn common_example(req: &HttpRequest<AppState>) -> Box<Future<Item = HttpResponse
                     let mut data = data_1.lock().unwrap();
 
                     (*data).common_examples.push(val);
+
+                    Ok(HttpResponse::Ok().into())
+                }).responder()
+        },
+
+        // Update a common example
+        &Method::PUT => {
+            #[derive(Deserialize)]
+            struct PutCommonExample {
+                id: usize,
+                text: String,
+                intent: String,
+                entities: Vec<Entity>,
+            }
+
+            let data_1 = req.state().rasa_nlu_data.clone();
+
+            req.json()
+                .from_err()
+                .and_then(move |val: PutCommonExample| {
+                    let mut data = data_1.lock().unwrap();
+
+                    // NOTE: Not checking array bounds
+                    (*data).common_examples.remove(val.id);
+                    (*data).common_examples.insert(val.id, CommonExample {
+                        text: val.text,
+                        intent: val.intent,
+                        entities: val.entities,
+                    });
 
                     Ok(HttpResponse::Ok().into())
                 }).responder()
@@ -126,6 +155,33 @@ fn regex_feature(req: &HttpRequest<AppState>) -> Box<Future<Item = HttpResponse,
                 }).responder()
         },
 
+        // Update a regex feature
+        &Method::PUT => {
+            #[derive(Deserialize)]
+            struct PutRegexFeature {
+                id: usize,
+                name: String,
+                pattern: String,
+            }
+
+            let data_1 = req.state().rasa_nlu_data.clone();
+
+            req.json()
+                .from_err()
+                .and_then(move |val: PutRegexFeature| {
+                    let mut data = data_1.lock().unwrap();
+
+                    // NOTE: Not checking array bounds
+                    (*data).regex_features.remove(val.id);
+                    (*data).regex_features.insert(val.id, RegexFeature {
+                        name: val.name,
+                        pattern: val.pattern,
+                    });
+
+                    Ok(HttpResponse::Ok().into())
+                }).responder()
+        },
+
         // Delete a regex feature
         &Method::DELETE => {
             #[derive(Deserialize)]
@@ -187,7 +243,35 @@ fn entity_synonym(req: &HttpRequest<AppState>) -> Box<Future<Item = HttpResponse
                 }).responder()
         },
 
-        // Delete a common example
+        // Update a entity synonym
+        &Method::PUT => {
+            #[derive(Deserialize)]
+            struct PutEntitySynonym {
+                id: usize,
+                value: String,
+                synonyms: Vec<String>,
+            }
+
+            let data_1 = req.state().rasa_nlu_data.clone();
+
+            req.json()
+                .from_err()
+                .and_then(move |val: PutEntitySynonym| {
+                    let mut data = data_1.lock().unwrap();
+
+                    // NOTE: Not checking array bounds
+                    (*data).entity_synonyms.remove(val.id);
+                    (*data).entity_synonyms.insert(val.id, EntitySynonym {
+                        value: val.value,
+                        synonyms: val.synonyms,
+                    });
+
+                    Ok(HttpResponse::Ok().into())
+                }).responder()
+        },
+
+
+        // Delete a entity synonym
         &Method::DELETE => {
             #[derive(Deserialize)]
             struct DeleteEntitySynonym {
