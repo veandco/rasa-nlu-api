@@ -1,5 +1,7 @@
 // std
 use std::sync::{Arc, Mutex};
+use std::fs::File;
+use std::io::Write;
 
 // actix-web
 extern crate actix_web;
@@ -19,6 +21,8 @@ extern crate serde_json;
 // internal
 mod rasa;
 use rasa::*;
+
+const SAVE_FILE_PATH: &str = "rasa_nlu_data.json";
 
 // This is where's we are going to manipulate Rasa NLU data
 struct AppState {
@@ -297,12 +301,41 @@ fn entity_synonym(req: &HttpRequest<AppState>) -> Box<Future<Item = HttpResponse
     }
 }
 
+fn save(req: &HttpRequest<AppState>) -> Box<Future<Item = HttpResponse, Error = Error>> {
+    match req.method() {
+        &Method::POST => {
+            let data_1 = req.state().rasa_nlu_data.clone();
+            let data = data_1.lock().unwrap();
+            let mut saved_file =
+                match File::create(SAVE_FILE_PATH) {
+                    Ok(f) => f,
+                    Err(_) => return result(Ok(HttpResponse::InternalServerError().into())).responder(),
+                };
+
+            let rasa_nlu = RasaNLU {
+                rasa_nlu_data: (*data).clone(),
+            };
+            let json = serde_json::to_vec(&rasa_nlu).unwrap();
+            let res = match saved_file.write_all(&json) {
+                Ok(_) => Ok(HttpResponse::Ok().into()),
+                Err(_) => Ok(HttpResponse::InternalServerError().into()),
+            };
+
+            result(res).responder()
+        },
+        _ => {
+            result(Ok(HttpResponse::MethodNotAllowed().into())).responder()
+        }
+    }
+}
+
 fn main() {
     server::new(|| App::with_state(AppState { rasa_nlu_data: Arc::new(Mutex::new(RasaNLUData::new())) })
                     .resource("/", |r| r.f(index))
                     .resource("/common-example", |r| r.f(common_example))
                     .resource("/regex-feature", |r| r.f(regex_feature))
-                    .resource("/entity-synonym", |r| r.f(entity_synonym)))
+                    .resource("/entity-synonym", |r| r.f(entity_synonym))
+                    .resource("/save", |r| r.f(save)))
         .bind("127.0.0.1:8088")
         .unwrap()
         .run();
