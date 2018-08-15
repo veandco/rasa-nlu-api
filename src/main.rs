@@ -1,12 +1,12 @@
 // std
-use std::sync::{Arc, Mutex};
 use std::fs::File;
 use std::io::Write;
+use std::sync::{Arc, Mutex};
 
 // actix-web
 extern crate actix_web;
-use actix_web::*;
 use actix_web::http::Method;
+use actix_web::*;
 
 // clap
 extern crate clap;
@@ -17,7 +17,7 @@ extern crate env_logger;
 
 // futures
 extern crate futures;
-use futures::future::{Future, result};
+use futures::future::{result, Future};
 
 // serde
 #[macro_use]
@@ -54,12 +54,12 @@ fn common_example(req: &HttpRequest<AppState>) -> Box<Future<Item = HttpResponse
             let json = json!((*data).common_examples).to_string();
 
             result(Ok(HttpResponse::Ok()
-                    .content_type("application/json")
-                    .body(json)))
+                .content_type("application/json")
+                .body(json)))
                 .responder()
-        },
+        }
 
-        // Post a common example 
+        // Post a common example
         &Method::POST => {
             type PostCommonExample = rasa::CommonExample;
 
@@ -73,8 +73,9 @@ fn common_example(req: &HttpRequest<AppState>) -> Box<Future<Item = HttpResponse
                     (*data).common_examples.push(val);
 
                     Ok(HttpResponse::Ok().into())
-                }).responder()
-        },
+                })
+                .responder()
+        }
 
         // Update a common example
         &Method::PUT => {
@@ -99,15 +100,19 @@ fn common_example(req: &HttpRequest<AppState>) -> Box<Future<Item = HttpResponse
                     }
 
                     (*data).common_examples.remove(val.id);
-                    (*data).common_examples.insert(val.id, CommonExample {
-                        text: val.text,
-                        intent: val.intent,
-                        entities: val.entities,
-                    });
+                    (*data).common_examples.insert(
+                        val.id,
+                        CommonExample {
+                            text: val.text,
+                            intent: val.intent,
+                            entities: val.entities,
+                        },
+                    );
 
                     Ok(HttpResponse::Ok().into())
-                }).responder()
-        },
+                })
+                .responder()
+        }
 
         // Delete a common example
         &Method::DELETE => {
@@ -131,11 +136,10 @@ fn common_example(req: &HttpRequest<AppState>) -> Box<Future<Item = HttpResponse
                     (*data).common_examples.remove(form.id);
 
                     Ok(HttpResponse::Ok().into())
-                }).responder()
-        },
-        _ => {
-            result(Ok(HttpResponse::MethodNotAllowed().into())).responder()
+                })
+                .responder()
         }
+        _ => result(Ok(HttpResponse::MethodNotAllowed().into())).responder(),
     }
 }
 
@@ -152,10 +156,10 @@ fn regex_feature(req: &HttpRequest<AppState>) -> Box<Future<Item = HttpResponse,
             let json = json!((*data).regex_features).to_string();
 
             result(Ok(HttpResponse::Ok()
-                    .content_type("application/json")
-                    .body(json)))
+                .content_type("application/json")
+                .body(json)))
                 .responder()
-        },
+        }
 
         // Post a regex feature
         &Method::POST => {
@@ -171,8 +175,9 @@ fn regex_feature(req: &HttpRequest<AppState>) -> Box<Future<Item = HttpResponse,
                     (*data).regex_features.push(val);
 
                     Ok(HttpResponse::Ok().into())
-                }).responder()
-        },
+                })
+                .responder()
+        }
 
         // Update a regex feature
         &Method::PUT => {
@@ -196,14 +201,18 @@ fn regex_feature(req: &HttpRequest<AppState>) -> Box<Future<Item = HttpResponse,
                     }
 
                     (*data).regex_features.remove(val.id);
-                    (*data).regex_features.insert(val.id, RegexFeature {
-                        name: val.name,
-                        pattern: val.pattern,
-                    });
+                    (*data).regex_features.insert(
+                        val.id,
+                        RegexFeature {
+                            name: val.name,
+                            pattern: val.pattern,
+                        },
+                    );
 
                     Ok(HttpResponse::Ok().into())
-                }).responder()
-        },
+                })
+                .responder()
+        }
 
         // Delete a regex feature
         &Method::DELETE => {
@@ -219,7 +228,6 @@ fn regex_feature(req: &HttpRequest<AppState>) -> Box<Future<Item = HttpResponse,
                 .and_then(move |form: DeleteRegexFeature| {
                     let mut data = data_1.lock().unwrap();
 
-
                     // Check array bound
                     if form.id >= (*data).regex_features.len() {
                         return Ok(HttpResponse::BadRequest().into());
@@ -228,11 +236,10 @@ fn regex_feature(req: &HttpRequest<AppState>) -> Box<Future<Item = HttpResponse,
                     (*data).regex_features.remove(form.id);
 
                     Ok(HttpResponse::Ok().into())
-                }).responder()
-        },
-        _ => {
-            result(Ok(HttpResponse::MethodNotAllowed().into())).responder()
+                })
+                .responder()
         }
+        _ => result(Ok(HttpResponse::MethodNotAllowed().into())).responder(),
     }
 }
 
@@ -249,12 +256,12 @@ fn entity_synonym(req: &HttpRequest<AppState>) -> Box<Future<Item = HttpResponse
             let json = json!((*data).entity_synonyms).to_string();
 
             result(Ok(HttpResponse::Ok()
-                    .content_type("application/json")
-                    .body(json)))
+                .content_type("application/json")
+                .body(json)))
                 .responder()
-        },
+        }
 
-        // Post a entity synonym 
+        // Post a entity synonym
         &Method::POST => {
             type PostEntitySynonym = rasa::EntitySynonym;
 
@@ -268,8 +275,9 @@ fn entity_synonym(req: &HttpRequest<AppState>) -> Box<Future<Item = HttpResponse
                     (*data).entity_synonyms.push(val);
 
                     Ok(HttpResponse::Ok().into())
-                }).responder()
-        },
+                })
+                .responder()
+        }
 
         // Update a entity synonym
         &Method::PUT => {
@@ -293,15 +301,18 @@ fn entity_synonym(req: &HttpRequest<AppState>) -> Box<Future<Item = HttpResponse
                     }
 
                     (*data).entity_synonyms.remove(val.id);
-                    (*data).entity_synonyms.insert(val.id, EntitySynonym {
-                        value: val.value,
-                        synonyms: val.synonyms,
-                    });
+                    (*data).entity_synonyms.insert(
+                        val.id,
+                        EntitySynonym {
+                            value: val.value,
+                            synonyms: val.synonyms,
+                        },
+                    );
 
                     Ok(HttpResponse::Ok().into())
-                }).responder()
-        },
-
+                })
+                .responder()
+        }
 
         // Delete a entity synonym
         &Method::DELETE => {
@@ -325,11 +336,10 @@ fn entity_synonym(req: &HttpRequest<AppState>) -> Box<Future<Item = HttpResponse
                     (*data).entity_synonyms.remove(form.id);
 
                     Ok(HttpResponse::Ok().into())
-                }).responder()
-        },
-        _ => {
-            result(Ok(HttpResponse::MethodNotAllowed().into())).responder()
+                })
+                .responder()
         }
+        _ => result(Ok(HttpResponse::MethodNotAllowed().into())).responder(),
     }
 }
 
@@ -338,11 +348,10 @@ fn save(req: &HttpRequest<AppState>) -> Box<Future<Item = HttpResponse, Error = 
         &Method::POST => {
             let data_1 = req.state().rasa_nlu_data.clone();
             let data = data_1.lock().unwrap();
-            let mut saved_file =
-                match File::create(SAVE_FILE_PATH) {
-                    Ok(f) => f,
-                    Err(_) => return result(Ok(HttpResponse::InternalServerError().into())).responder(),
-                };
+            let mut saved_file = match File::create(SAVE_FILE_PATH) {
+                Ok(f) => f,
+                Err(_) => return result(Ok(HttpResponse::InternalServerError().into())).responder(),
+            };
 
             let rasa_nlu = RasaNLU {
                 rasa_nlu_data: (*data).clone(),
@@ -354,10 +363,8 @@ fn save(req: &HttpRequest<AppState>) -> Box<Future<Item = HttpResponse, Error = 
             };
 
             result(res).responder()
-        },
-        _ => {
-            result(Ok(HttpResponse::MethodNotAllowed().into())).responder()
         }
+        _ => result(Ok(HttpResponse::MethodNotAllowed().into())).responder(),
     }
 }
 
@@ -368,13 +375,11 @@ fn data(req: &HttpRequest<AppState>) -> Box<Future<Item = HttpResponse, Error = 
             let data = data_1.lock().unwrap();
             let json = serde_json::to_string(&*data).unwrap();
             let res = HttpResponse::Ok()
-                        .content_type("application/json")
-                        .body(json);
+                .content_type("application/json")
+                .body(json);
             result(Ok(res)).responder()
-        },
-        _ => {
-            result(Ok(HttpResponse::MethodNotAllowed().into())).responder()
         }
+        _ => result(Ok(HttpResponse::MethodNotAllowed().into())).responder(),
     }
 }
 
@@ -383,20 +388,24 @@ fn main() {
 
     // Parse command-line options
     let matches = clap::App::new("Rasa NLU API")
-                        .version("0.0.1")
-                        .author("Jacky Boen <jacky@veand.co>")
-                        .about("Rasa NLU API for editing training dataset")
-                        .arg(Arg::with_name("data")
-                            .short("d")
-                            .long("data")
-                            .value_name("FILE")
-                            .help("Sets data file to load from")
-                            .takes_value(true))
-                        .arg(Arg::with_name("v")
-                            .short("v")
-                            .multiple(true)
-                            .help("Sets the level of verbosity"))
-                        .get_matches();
+        .version("0.0.1")
+        .author("Jacky Boen <jacky@veand.co>")
+        .about("Rasa NLU API for editing training dataset")
+        .arg(
+            Arg::with_name("data")
+                .short("d")
+                .long("data")
+                .value_name("FILE")
+                .help("Sets data file to load from")
+                .takes_value(true),
+        )
+        .arg(
+            Arg::with_name("v")
+                .short("v")
+                .multiple(true)
+                .help("Sets the level of verbosity"),
+        )
+        .get_matches();
 
     // Check data file path if it's set in the program arguments
     let save_file_path = matches.value_of("data").unwrap_or(SAVE_FILE_PATH);
@@ -413,24 +422,26 @@ fn main() {
                 Err(_) => {
                     println!("Using empty data");
                     RasaNLU::new()
-                },
+                }
             }
-        },
+        }
         Err(_) => {
             println!("Using empty data");
             RasaNLU::new()
-        },
+        }
     };
 
     // Run server
-    server::new(move || App::with_state(AppState { rasa_nlu_data: Arc::new(Mutex::new(rasa_nlu.rasa_nlu_data.clone())) })
-                    .resource("/", |r| r.f(index))
-                    .resource("/common-example", |r| r.f(common_example))
-                    .resource("/regex-feature", |r| r.f(regex_feature))
-                    .resource("/entity-synonym", |r| r.f(entity_synonym))
-                    .resource("/save", |r| r.f(save))
-                    .resource("/data", |r| r.f(data)))
-        .bind("127.0.0.1:8088")
+    server::new(move || {
+        App::with_state(AppState {
+            rasa_nlu_data: Arc::new(Mutex::new(rasa_nlu.rasa_nlu_data.clone())),
+        }).resource("/", |r| r.f(index))
+            .resource("/common-example", |r| r.f(common_example))
+            .resource("/regex-feature", |r| r.f(regex_feature))
+            .resource("/entity-synonym", |r| r.f(entity_synonym))
+            .resource("/save", |r| r.f(save))
+            .resource("/data", |r| r.f(data))
+    }).bind("127.0.0.1:8088")
         .unwrap()
         .run();
 }
