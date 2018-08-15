@@ -8,6 +8,10 @@ extern crate actix_web;
 use actix_web::*;
 use actix_web::http::Method;
 
+// clap
+extern crate clap;
+use clap::Arg;
+
 // futures
 extern crate futures;
 use futures::future::{Future, result};
@@ -347,16 +351,45 @@ fn data(req: &HttpRequest<AppState>) -> Box<Future<Item = HttpResponse, Error = 
 }
 
 fn main() {
-    // Open saved file
-    let loaded_file = match File::open(SAVE_FILE_PATH) {
-        Ok(f) => f,
-        Err(err) => panic!("Could not load Rasa NLU data file: {}", err),
-    };
+    // Parse command-line options
+    let matches = clap::App::new("Rasa NLU API")
+                        .version("0.0.1")
+                        .author("Jacky Boen <jacky@veand.co>")
+                        .about("Rasa NLU API for editing training dataset")
+                        .arg(Arg::with_name("data")
+                            .short("d")
+                            .long("data")
+                            .value_name("FILE")
+                            .help("Sets data file to load from")
+                            .takes_value(true))
+                        .arg(Arg::with_name("v")
+                            .short("v")
+                            .multiple(true)
+                            .help("Sets the level of verbosity"))
+                        .get_matches();
 
-    // Parse JSON from data
-    let rasa_nlu = match serde_json::from_reader(loaded_file) {
-        Ok(data) => data,
-        Err(_) => RasaNLU::new(),
+    // Check data file path if it's set in the program arguments
+    let save_file_path = matches.value_of("data").unwrap_or(SAVE_FILE_PATH);
+
+    // Open saved file
+    let rasa_nlu = match File::open(save_file_path) {
+        Ok(f) => {
+            // Parse JSON from data
+            match serde_json::from_reader(f) {
+                Ok(data) => {
+                    println!("Using data from {}", save_file_path);
+                    data
+                }
+                Err(_) => {
+                    println!("Using empty data");
+                    RasaNLU::new()
+                },
+            }
+        },
+        Err(_) => {
+            println!("Using empty data");
+            RasaNLU::new()
+        },
     };
 
     // Run server
