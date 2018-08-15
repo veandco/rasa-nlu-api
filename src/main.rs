@@ -12,6 +12,9 @@ use actix_web::http::Method;
 extern crate clap;
 use clap::Arg;
 
+// env_logger
+extern crate env_logger;
+
 // futures
 extern crate futures;
 use futures::future::{Future, result};
@@ -351,6 +354,8 @@ fn data(req: &HttpRequest<AppState>) -> Box<Future<Item = HttpResponse, Error = 
 }
 
 fn main() {
+    env_logger::init();
+
     // Parse command-line options
     let matches = clap::App::new("Rasa NLU API")
                         .version("0.0.1")
