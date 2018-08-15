@@ -93,7 +93,11 @@ fn common_example(req: &HttpRequest<AppState>) -> Box<Future<Item = HttpResponse
                 .and_then(move |val: PutCommonExample| {
                     let mut data = data_1.lock().unwrap();
 
-                    // NOTE: Not checking array bounds
+                    // Check array bound
+                    if val.id >= (*data).common_examples.len() {
+                        return Ok(HttpResponse::BadRequest().into());
+                    }
+
                     (*data).common_examples.remove(val.id);
                     (*data).common_examples.insert(val.id, CommonExample {
                         text: val.text,
@@ -119,7 +123,11 @@ fn common_example(req: &HttpRequest<AppState>) -> Box<Future<Item = HttpResponse
                 .and_then(move |form: DeleteCommonExample| {
                     let mut data = data_1.lock().unwrap();
 
-                    // NOTE: Not checking array bounds
+                    // Check array bound
+                    if form.id >= (*data).common_examples.len() {
+                        return Ok(HttpResponse::BadRequest().into());
+                    }
+
                     (*data).common_examples.remove(form.id);
 
                     Ok(HttpResponse::Ok().into())
@@ -182,7 +190,11 @@ fn regex_feature(req: &HttpRequest<AppState>) -> Box<Future<Item = HttpResponse,
                 .and_then(move |val: PutRegexFeature| {
                     let mut data = data_1.lock().unwrap();
 
-                    // NOTE: Not checking array bounds
+                    // Check array bound
+                    if val.id >= (*data).regex_features.len() {
+                        return Ok(HttpResponse::BadRequest().into());
+                    }
+
                     (*data).regex_features.remove(val.id);
                     (*data).regex_features.insert(val.id, RegexFeature {
                         name: val.name,
@@ -207,7 +219,12 @@ fn regex_feature(req: &HttpRequest<AppState>) -> Box<Future<Item = HttpResponse,
                 .and_then(move |form: DeleteRegexFeature| {
                     let mut data = data_1.lock().unwrap();
 
-                    // NOTE: Not checking array bounds
+
+                    // Check array bound
+                    if form.id >= (*data).regex_features.len() {
+                        return Ok(HttpResponse::BadRequest().into());
+                    }
+
                     (*data).regex_features.remove(form.id);
 
                     Ok(HttpResponse::Ok().into())
@@ -270,7 +287,11 @@ fn entity_synonym(req: &HttpRequest<AppState>) -> Box<Future<Item = HttpResponse
                 .and_then(move |val: PutEntitySynonym| {
                     let mut data = data_1.lock().unwrap();
 
-                    // NOTE: Not checking array bounds
+                    // Check array bound
+                    if val.id >= (*data).entity_synonyms.len() {
+                        return Ok(HttpResponse::BadRequest().into());
+                    }
+
                     (*data).entity_synonyms.remove(val.id);
                     (*data).entity_synonyms.insert(val.id, EntitySynonym {
                         value: val.value,
@@ -296,7 +317,11 @@ fn entity_synonym(req: &HttpRequest<AppState>) -> Box<Future<Item = HttpResponse
                 .and_then(move |form: DeleteEntitySynonym| {
                     let mut data = data_1.lock().unwrap();
 
-                    // NOTE: Not checking array bounds
+                    // Check array bound
+                    if form.id >= (*data).entity_synonyms.len() {
+                        return Ok(HttpResponse::BadRequest().into());
+                    }
+
                     (*data).entity_synonyms.remove(form.id);
 
                     Ok(HttpResponse::Ok().into())
