@@ -330,7 +330,20 @@ fn save(req: &HttpRequest<AppState>) -> Box<Future<Item = HttpResponse, Error = 
 }
 
 fn main() {
-    server::new(|| App::with_state(AppState { rasa_nlu_data: Arc::new(Mutex::new(RasaNLUData::new())) })
+    // Open saved file
+    let loaded_file = match File::open(SAVE_FILE_PATH) {
+        Ok(f) => f,
+        Err(err) => panic!("Could not load Rasa NLU data file: {}", err),
+    };
+
+    // Parse JSON from data
+    let rasa_nlu = match serde_json::from_reader(loaded_file) {
+        Ok(data) => data,
+        Err(_) => RasaNLU::new(),
+    };
+
+    // Run server
+    server::new(move || App::with_state(AppState { rasa_nlu_data: Arc::new(Mutex::new(rasa_nlu.rasa_nlu_data.clone())) })
                     .resource("/", |r| r.f(index))
                     .resource("/common-example", |r| r.f(common_example))
                     .resource("/regex-feature", |r| r.f(regex_feature))

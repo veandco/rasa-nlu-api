@@ -1,9 +1,17 @@
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct RasaNLU {
     pub rasa_nlu_data: RasaNLUData,
 }
 
-#[derive(Serialize, Deserialize, Clone)]
+impl RasaNLU {
+    pub fn new() -> Self {
+        Self {
+            rasa_nlu_data: RasaNLUData::new(),
+        }
+    }
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct RasaNLUData {
     pub common_examples: Vec<CommonExample>,
     pub regex_features: Vec<RegexFeature>,
@@ -20,14 +28,14 @@ impl RasaNLUData {
     }
 }
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct CommonExample {
     pub text: String,
     pub intent: String,
     pub entities: Vec<Entity>,
 }
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Entity {
     start: i32,
     end: i32,
@@ -35,13 +43,13 @@ pub struct Entity {
     entity: String,
 }
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct RegexFeature {
     pub name: String,
     pub pattern: String,
 }
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct EntitySynonym {
     pub value: String,
     pub synonyms: Vec<String>,
