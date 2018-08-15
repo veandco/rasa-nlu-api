@@ -329,6 +329,23 @@ fn save(req: &HttpRequest<AppState>) -> Box<Future<Item = HttpResponse, Error = 
     }
 }
 
+fn data(req: &HttpRequest<AppState>) -> Box<Future<Item = HttpResponse, Error = Error>> {
+    match req.method() {
+        &Method::GET => {
+            let data_1 = req.state().rasa_nlu_data.clone();
+            let data = data_1.lock().unwrap();
+            let json = serde_json::to_string(&*data).unwrap();
+            let res = HttpResponse::Ok()
+                        .content_type("application/json")
+                        .body(json);
+            result(Ok(res)).responder()
+        },
+        _ => {
+            result(Ok(HttpResponse::MethodNotAllowed().into())).responder()
+        }
+    }
+}
+
 fn main() {
     // Open saved file
     let loaded_file = match File::open(SAVE_FILE_PATH) {
@@ -348,7 +365,8 @@ fn main() {
                     .resource("/common-example", |r| r.f(common_example))
                     .resource("/regex-feature", |r| r.f(regex_feature))
                     .resource("/entity-synonym", |r| r.f(entity_synonym))
-                    .resource("/save", |r| r.f(save)))
+                    .resource("/save", |r| r.f(save))
+                    .resource("/data", |r| r.f(data)))
         .bind("127.0.0.1:8088")
         .unwrap()
         .run();
