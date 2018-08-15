@@ -6,6 +6,7 @@ use std::sync::{Arc, Mutex};
 // actix-web
 extern crate actix_web;
 use actix_web::http::Method;
+use actix_web::middleware::cors::Cors;
 use actix_web::*;
 
 // clap
@@ -400,6 +401,11 @@ fn main() {
                 .takes_value(true),
         )
         .arg(
+            Arg::with_name("cors")
+                .long("cors")
+                .help("Allow CORS")
+        )
+        .arg(
             Arg::with_name("v")
                 .short("v")
                 .multiple(true)
@@ -432,16 +438,35 @@ fn main() {
     };
 
     // Run server
-    server::new(move || {
-        App::with_state(AppState {
-            rasa_nlu_data: Arc::new(Mutex::new(rasa_nlu.rasa_nlu_data.clone())),
-        }).resource("/", |r| r.f(index))
-            .resource("/common-example", |r| r.f(common_example))
-            .resource("/regex-feature", |r| r.f(regex_feature))
-            .resource("/entity-synonym", |r| r.f(entity_synonym))
-            .resource("/save", |r| r.f(save))
-            .resource("/data", |r| r.f(data))
-    }).bind("127.0.0.1:8088")
-        .unwrap()
-        .run();
+    if matches.is_present("cors") {
+        server::new(move || {
+            App::with_state(AppState {
+                rasa_nlu_data: Arc::new(Mutex::new(rasa_nlu.rasa_nlu_data.clone())),
+            }).configure(|app| {
+                Cors::for_app(app)
+                    .resource("/", |r| r.f(index))
+                    .resource("/common-example", |r| r.f(common_example))
+                    .resource("/regex-feature", |r| r.f(regex_feature))
+                    .resource("/entity-synonym", |r| r.f(entity_synonym))
+                    .resource("/save", |r| r.f(save))
+                    .resource("/data", |r| r.f(data))
+                    .register()
+            })
+        }).bind("127.0.0.1:8088")
+            .unwrap()
+            .run();
+    } else {
+        server::new(move || {
+            App::with_state(AppState {
+                rasa_nlu_data: Arc::new(Mutex::new(rasa_nlu.rasa_nlu_data.clone())),
+            }).resource("/", |r| r.f(index))
+                .resource("/common-example", |r| r.f(common_example))
+                .resource("/regex-feature", |r| r.f(regex_feature))
+                .resource("/entity-synonym", |r| r.f(entity_synonym))
+                .resource("/save", |r| r.f(save))
+                .resource("/data", |r| r.f(data))
+        }).bind("127.0.0.1:8088")
+            .unwrap()
+            .run();
+    }
 }
