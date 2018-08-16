@@ -452,7 +452,8 @@ fn main() {
                     .resource("/data", |r| r.f(data))
                     .register()
             })
-        }).bind("127.0.0.1:8088")
+        }).workers(1)
+            .bind("127.0.0.1:8088")
             .unwrap()
             .run();
     } else {
@@ -465,7 +466,8 @@ fn main() {
                 .resource("/entity-synonym", |r| r.f(entity_synonym))
                 .resource("/save", |r| r.f(save))
                 .resource("/data", |r| r.f(data))
-        }).bind("127.0.0.1:8088")
+        }).workers(1)
+            .bind("127.0.0.1:8088")
             .unwrap()
             .run();
     }
