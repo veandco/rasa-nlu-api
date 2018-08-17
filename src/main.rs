@@ -48,18 +48,6 @@ fn index(_req: &HttpRequest<AppState>) -> &'static str {
 
 fn common_example(req: &HttpRequest<AppState>) -> Box<Future<Item = HttpResponse, Error = Error>> {
     match req.method() {
-        // Get common examples
-        &Method::GET => {
-            let data_1 = req.state().rasa_nlu_data.clone();
-            let data = data_1.lock().unwrap();
-            let json = json!((*data).common_examples).to_string();
-
-            result(Ok(HttpResponse::Ok()
-                .content_type("application/json")
-                .body(json)))
-                .responder()
-        }
-
         // Post a common example
         &Method::POST => {
             type PostCommonExample = rasa::CommonExample;
@@ -144,17 +132,13 @@ fn common_example(req: &HttpRequest<AppState>) -> Box<Future<Item = HttpResponse
     }
 }
 
-///////////////////
-// Regex Feature //
-///////////////////
-
-fn regex_feature(req: &HttpRequest<AppState>) -> Box<Future<Item = HttpResponse, Error = Error>> {
+fn common_examples(req: &HttpRequest<AppState>) -> Box<Future<Item = HttpResponse, Error = Error>> {
     match req.method() {
-        // Get regex features
+        // Get common examples
         &Method::GET => {
             let data_1 = req.state().rasa_nlu_data.clone();
             let data = data_1.lock().unwrap();
-            let json = json!((*data).regex_features).to_string();
+            let json = json!((*data).common_examples).to_string();
 
             result(Ok(HttpResponse::Ok()
                 .content_type("application/json")
@@ -162,6 +146,33 @@ fn regex_feature(req: &HttpRequest<AppState>) -> Box<Future<Item = HttpResponse,
                 .responder()
         }
 
+        // Put common examples
+        &Method::PUT => {
+            let data_1 = req.state().rasa_nlu_data.clone();
+
+            req.json()
+                .from_err()
+                .and_then(move |val: Vec<rasa::CommonExample>| {
+                    let mut data = data_1.lock().unwrap();
+
+                    (*data).common_examples = val;
+
+                    Ok(HttpResponse::Ok()
+                        .content_type("text/plain")
+                        .body("ok"))
+                })
+                .responder()
+        }
+        _ => result(Ok(HttpResponse::MethodNotAllowed().into())).responder(),
+    }
+}
+
+///////////////////
+// Regex Feature //
+///////////////////
+
+fn regex_feature(req: &HttpRequest<AppState>) -> Box<Future<Item = HttpResponse, Error = Error>> {
+    match req.method() {
         // Post a regex feature
         &Method::POST => {
             type PostRegexFeature = rasa::RegexFeature;
@@ -244,17 +255,13 @@ fn regex_feature(req: &HttpRequest<AppState>) -> Box<Future<Item = HttpResponse,
     }
 }
 
-////////////////////
-// Entity Synonym //
-////////////////////
-
-fn entity_synonym(req: &HttpRequest<AppState>) -> Box<Future<Item = HttpResponse, Error = Error>> {
+fn regex_features(req: &HttpRequest<AppState>) -> Box<Future<Item = HttpResponse, Error = Error>> {
     match req.method() {
-        // Get entity synonyms
+        // Get regex features
         &Method::GET => {
             let data_1 = req.state().rasa_nlu_data.clone();
             let data = data_1.lock().unwrap();
-            let json = json!((*data).entity_synonyms).to_string();
+            let json = json!((*data).regex_features).to_string();
 
             result(Ok(HttpResponse::Ok()
                 .content_type("application/json")
@@ -262,6 +269,33 @@ fn entity_synonym(req: &HttpRequest<AppState>) -> Box<Future<Item = HttpResponse
                 .responder()
         }
 
+        // Put regex features
+        &Method::PUT => {
+            let data_1 = req.state().rasa_nlu_data.clone();
+
+            req.json()
+                .from_err()
+                .and_then(move |val: Vec<rasa::RegexFeature>| {
+                    let mut data = data_1.lock().unwrap();
+
+                    (*data).regex_features = val;
+
+                    Ok(HttpResponse::Ok()
+                        .content_type("text/plain")
+                        .body("ok"))
+                })
+                .responder()
+        }
+        _ => result(Ok(HttpResponse::MethodNotAllowed().into())).responder(),
+    }
+}
+
+////////////////////
+// Entity Synonym //
+////////////////////
+
+fn entity_synonym(req: &HttpRequest<AppState>) -> Box<Future<Item = HttpResponse, Error = Error>> {
+    match req.method() {
         // Post a entity synonym
         &Method::POST => {
             type PostEntitySynonym = rasa::EntitySynonym;
@@ -337,6 +371,41 @@ fn entity_synonym(req: &HttpRequest<AppState>) -> Box<Future<Item = HttpResponse
                     (*data).entity_synonyms.remove(form.id);
 
                     Ok(HttpResponse::Ok().into())
+                })
+                .responder()
+        }
+        _ => result(Ok(HttpResponse::MethodNotAllowed().into())).responder(),
+    }
+}
+
+fn entity_synonyms(req: &HttpRequest<AppState>) -> Box<Future<Item = HttpResponse, Error = Error>> {
+    match req.method() {
+        // Get entity synonyms
+        &Method::GET => {
+            let data_1 = req.state().rasa_nlu_data.clone();
+            let data = data_1.lock().unwrap();
+            let json = json!((*data).entity_synonyms).to_string();
+
+            result(Ok(HttpResponse::Ok()
+                .content_type("application/json")
+                .body(json)))
+                .responder()
+        }
+
+        // Put entity synonyms
+        &Method::PUT => {
+            let data_1 = req.state().rasa_nlu_data.clone();
+
+            req.json()
+                .from_err()
+                .and_then(move |val: Vec<rasa::EntitySynonym>| {
+                    let mut data = data_1.lock().unwrap();
+
+                    (*data).entity_synonyms = val;
+
+                    Ok(HttpResponse::Ok()
+                        .content_type("text/plain")
+                        .body("ok"))
                 })
                 .responder()
         }
@@ -446,8 +515,11 @@ fn main() {
                 Cors::for_app(app)
                     .resource("/", |r| r.f(index))
                     .resource("/common-example", |r| r.f(common_example))
+                    .resource("/common-examples", |r| r.f(common_examples))
                     .resource("/regex-feature", |r| r.f(regex_feature))
+                    .resource("/regex-features", |r| r.f(regex_features))
                     .resource("/entity-synonym", |r| r.f(entity_synonym))
+                    .resource("/entity-synonyms", |r| r.f(entity_synonyms))
                     .resource("/save", |r| r.f(save))
                     .resource("/data", |r| r.f(data))
                     .register()
@@ -462,8 +534,11 @@ fn main() {
                 rasa_nlu_data: Arc::new(Mutex::new(rasa_nlu.rasa_nlu_data.clone())),
             }).resource("/", |r| r.f(index))
                 .resource("/common-example", |r| r.f(common_example))
+                .resource("/common-examples", |r| r.f(common_examples))
                 .resource("/regex-feature", |r| r.f(regex_feature))
+                .resource("/regex-features", |r| r.f(regex_features))
                 .resource("/entity-synonym", |r| r.f(entity_synonym))
+                .resource("/entity-synonyms", |r| r.f(entity_synonyms))
                 .resource("/save", |r| r.f(save))
                 .resource("/data", |r| r.f(data))
         }).workers(1)
